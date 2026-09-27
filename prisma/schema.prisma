@@ -1,0 +1,121 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Problem {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  difficulty  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  requirements Requirement[]
+  rubrics      Rubric[]
+  attempts     Attempt[]
+}
+
+model Requirement {
+  id        String   @id @default(uuid())
+  problemId String
+  text      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+}
+
+model Rubric {
+  id        String   @id @default(uuid())
+  problemId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  problem  Problem           @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  criteria RubricCriterion[]
+}
+
+model RubricCriterion {
+  id          String   @id @default(uuid())
+  rubricId    String
+  dimension   String
+  description String
+  maxScore    Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  rubric           Rubric             @relation(fields: [rubricId], references: [id], onDelete: Cascade)
+  evaluationResult EvaluationResult[]
+}
+
+enum AttemptStatus {
+  DRAFT
+  SUBMITTED
+  EVALUATING
+  COMPLETED
+  FAILED
+}
+
+model Attempt {
+  id        String        @id @default(uuid())
+  problemId String
+  userId    String        // simple string for MVP (e.g., "demo-learner")
+  status    AttemptStatus @default(DRAFT)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  problem    Problem     @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  submission Submission?
+  evaluation Evaluation?
+}
+
+model Submission {
+  id        String   @id @default(uuid())
+  attemptId String   @unique
+  content   String   // The text-based submission content for MVP
+  format    String   @default("TEXT") // Extensibility for Change Test A
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  attempt Attempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+}
+
+enum EvaluationStatus {
+  EVALUATING
+  COMPLETED
+  FAILED
+}
+
+model Evaluation {
+  id           String           @id @default(uuid())
+  attemptId    String           @unique
+  status       EvaluationStatus
+  overallScore Float?
+  error        String?          // If status is FAILED
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  attempt Attempt            @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  results EvaluationResult[]
+}
+
+model EvaluationResult {
+  id           String   @id @default(uuid())
+  evaluationId String
+  criterionId  String
+  score        Float
+  evidence     String?
+  concern      String?
+  suggestion   String?
+  confidence   Float?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  evaluation Evaluation      @relation(fields: [evaluationId], references: [id], onDelete: Cascade)
+  criterion  RubricCriterion @relation(fields: [criterionId], references: [id], onDelete: Cascade)
+}

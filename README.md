@@ -1,36 +1,74 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# LLD Coach — Low-Level Design Practice Platform
 
-## Getting Started
+## Project Overview
+LLD Coach is a focused web application designed to help learners repeatedly practice Low-Level Design (LLD) problems. The platform allows users to choose a problem, think and design a solution, submit it, receive AI-powered and deterministic evaluation feedback, and track their progress through previous attempts.
 
-First, run the development server:
+## Features
+- **Problem Discovery**: Browse a curated set of LLD problems (e.g., Parking Lot, Vending Machine).
+- **Practice Area**: Submit text-based LLD solutions detailing requirements, classes, interfaces, relationships, design trade-offs, and edge cases.
+- **Evaluation Engine**: Uses a hybrid approach with deterministic checks and an LLM-based evaluator to provide structured, rubric-based feedback.
+- **Attempt History**: Review past submissions, see scores across various dimensions, and retry problems to improve.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Tech Stack
+- **Frontend**: Next.js (App Router), TypeScript, Tailwind CSS
+- **Backend**: Next.js Route Handlers
+- **Database**: PostgreSQL (Neon compatible)
+- **ORM**: Prisma
+- **Validation**: Zod
+- **Testing**: Vitest/Jest (To be configured)
+- **AI**: Abstracted Evaluator interface (ready for LLM provider integration)
+
+## Architecture
+This project follows a clean, modular monolith architecture to keep UI, application logic, domain logic, and infrastructure separated.
+
+```
+src/
+  app/              # Next.js App Router (UI & Route Handlers)
+  components/       # Reusable React components
+  domain/           # Core domain models (Problem, Attempt, Submission, Evaluation)
+  application/      # Application services and use cases
+  infrastructure/   # External integrations (Database, AI Providers)
+  lib/              # Shared utilities
+  types/            # Global TypeScript types
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Setup Instructions
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Environment Variables
+Create a `.env` file in the root directory based on `.env.example` (if provided). You will need:
+- `DATABASE_URL`: Connection string for your PostgreSQL database.
+- AI Provider keys (e.g., `OPENAI_API_KEY` or similar, depending on the chosen provider).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Database Setup
+Ensure you have a running instance of PostgreSQL.
 
-## Learn More
+1. **Apply Migrations**:
+   ```bash
+   npx prisma migrate dev
+   ```
+2. **Seed the Database** (Loads initial LLD problems):
+   ```bash
+   npx prisma db seed
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+### Development Commands
+To start the Next.js development server:
+```bash
+npm run dev
+```
+Open [http://localhost:3000](http://localhost:3000) to view the application.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Testing
+Tests will be located alongside the files or in a dedicated `__tests__` folder.
+To run the test suite (once fully set up):
+```bash
+npm run test
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Deployment
+The application is designed to be easily deployed to Vercel. Ensure your `DATABASE_URL` is set in Vercel's environment variables.
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Limitations
+- **Submission Format**: Currently supports only text-based submissions (no custom UML/diagram editors in the MVP).
+- **Authentication**: Uses a simple demo session/learner for the MVP to minimize scope.
+- **Microservices**: None. This is intentionally built as a monolithic application without complex event buses or distributed infrastructure to stay focused on the core practice loop.
