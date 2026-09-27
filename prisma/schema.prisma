@@ -28,6 +28,8 @@ model Requirement {
   updatedAt DateTime @updatedAt
 
   problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@index([problemId])
 }
 
 model Rubric {
@@ -38,6 +40,8 @@ model Rubric {
 
   problem  Problem           @relation(fields: [problemId], references: [id], onDelete: Cascade)
   criteria RubricCriterion[]
+
+  @@index([problemId])
 }
 
 model RubricCriterion {
@@ -51,6 +55,8 @@ model RubricCriterion {
 
   rubric           Rubric             @relation(fields: [rubricId], references: [id], onDelete: Cascade)
   evaluationResult EvaluationResult[]
+
+  @@index([rubricId])
 }
 
 enum AttemptStatus {
@@ -72,6 +78,9 @@ model Attempt {
   problem    Problem     @relation(fields: [problemId], references: [id], onDelete: Cascade)
   submission Submission?
   evaluation Evaluation?
+
+  @@index([problemId])
+  @@index([userId])
 }
 
 model Submission {
@@ -118,4 +127,6 @@ model EvaluationResult {
 
   evaluation Evaluation      @relation(fields: [evaluationId], references: [id], onDelete: Cascade)
   criterion  RubricCriterion @relation(fields: [criterionId], references: [id], onDelete: Cascade)
+
+  @@index([evaluationId])
 }

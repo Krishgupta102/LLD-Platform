@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 interface CriterionInfo {
   id: string
@@ -49,9 +50,28 @@ const DIMENSION_BADGES: Record<string, { bg: string; text: string }> = {
 }
 
 export function FeedbackClient({ attemptId, problemId }: { attemptId: string; problemId: string }) {
+  const router = useRouter()
   const [evaluation, setEvaluation] = useState<EvaluationData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [retrying, setRetrying] = useState(false)
+
+  const handleRetry = async () => {
+    setRetrying(true)
+    try {
+      const res = await fetch(`/api/problems/${problemId}/attempts`, {
+        method: 'POST',
+      })
+      if (!res.ok) {
+        throw new Error('Failed to create new attempt')
+      }
+      const newAttempt = await res.json()
+      router.push(`/attempts/${newAttempt.id}/practice`)
+    } catch (err) {
+      console.error('Retry attempt creation failed:', err)
+      setRetrying(false)
+    }
+  }
 
   useEffect(() => {
     let timer: NodeJS.Timeout
@@ -121,12 +141,21 @@ export function FeedbackClient({ attemptId, problemId }: { attemptId: string; pr
         <p className="text-rose-400/80 text-sm mb-6">
           {evaluation?.error || error || 'An unexpected error occurred during evaluation.'}
         </p>
-        <Link
-          href={`/problems/${problemId}`}
-          className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg bg-surface border border-border text-foreground hover:bg-surface-hover transition-colors"
-        >
-          Return to Problem
-        </Link>
+        <div className="flex items-center justify-center gap-4">
+          <button
+            onClick={handleRetry}
+            disabled={retrying}
+            className="px-4 py-2 text-sm font-medium rounded-lg bg-accent text-white hover:bg-accent-hover transition-colors disabled:opacity-50"
+          >
+            {retrying ? 'Creating New Attempt...' : 'Retry Problem'}
+          </button>
+          <Link
+            href={`/problems/${problemId}`}
+            className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg bg-surface border border-border text-foreground hover:bg-surface-hover transition-colors"
+          >
+            Return to Problem
+          </Link>
+        </div>
       </div>
     )
   }
@@ -254,20 +283,34 @@ export function FeedbackClient({ attemptId, problemId }: { attemptId: string; pr
       </div>
 
       {/* Footer Navigation */}
-      <div className="flex items-center justify-between pt-6 border-t border-border">
+      <div className="flex items-center justify-between pt-6 border-t border-border flex-wrap gap-4">
         <Link
-          href="/"
+          href="/attempts"
           className="px-5 py-2.5 text-sm font-medium rounded-xl bg-surface border border-border hover:bg-surface-hover transition-colors"
         >
-          ← Back to Dashboard
+          ← My Attempts History
         </Link>
-        <Link
-          href={`/problems/${problemId}`}
-          className="px-5 py-2.5 text-sm font-medium rounded-xl bg-accent text-accent-foreground hover:bg-accent/90 shadow-md transition-all"
-        >
-          Try Another Problem →
-        </Link>
+
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleRetry}
+            disabled={retrying}
+            className="px-5 py-2.5 text-sm font-medium rounded-xl bg-accent text-white hover:bg-accent-hover transition-all disabled:opacity-50 flex items-center gap-2"
+          >
+            {retrying && (
+              <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+            )}
+            {retrying ? 'Creating Attempt...' : '🔄 Retry Problem'}
+          </button>
+          <Link
+            href="/"
+            className="px-5 py-2.5 text-sm font-medium rounded-xl bg-surface border border-border hover:bg-surface-hover transition-colors"
+          >
+            All Problems →
+          </Link>
+        </div>
       </div>
     </div>
   )
 }
+

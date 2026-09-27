@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/infrastructure/database/prisma'
-
-const DEMO_USER_ID = 'demo-learner'
+import { DEMO_USER_ID } from '@/lib/auth'
 
 export async function POST(
   _request: Request,

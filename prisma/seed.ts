@@ -6,7 +6,7 @@ async function main() {
   console.log('Seeding database with initial LLD problems...')
 
   // 1. Parking Lot
-  const parkingLot = await prisma.problem.create({
+  await prisma.problem.create({
     data: {
       title: 'Parking Lot System',
       description: 'Design a low-level parking lot system. It should support multiple floors, different types of vehicles, and automatic ticket generation.',
@@ -38,7 +38,7 @@ async function main() {
   console.log('Created Problem: Parking Lot System')
 
   // 2. Vending Machine
-  const vendingMachine = await prisma.problem.create({
+  await prisma.problem.create({
     data: {
       title: 'Vending Machine',
       description: 'Design a vending machine that dispenses products when the correct amount is inserted. It should support various states like accepting money, selecting product, and dispensing.',
@@ -69,7 +69,7 @@ async function main() {
   console.log('Created Problem: Vending Machine')
 
   // 3. Elevator System
-  const elevatorSystem = await prisma.problem.create({
+  await prisma.problem.create({
     data: {
       title: 'Elevator System',
       description: 'Design an elevator system for a building with multiple elevators and multiple floors. The system should optimize wait times.',
@@ -100,7 +100,7 @@ async function main() {
   console.log('Created Problem: Elevator System')
 
   // 4. Library Management
-  const libraryManagement = await prisma.problem.create({
+  await prisma.problem.create({
     data: {
       title: 'Library Management System',
       description: 'Design a system to manage a library’s catalog, member accounts, and book borrowing/returning.',

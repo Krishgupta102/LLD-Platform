@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getAttemptWithProblem } from '@/application/attempts/service'
+import { DEMO_USER_ID } from '@/lib/auth'
 
 export async function GET(
   _request: Request,
@@ -16,8 +17,8 @@ export async function GET(
       )
     }
 
-    // Ensure it belongs to the active user (hardcoded for MVP)
-    if (attempt.userId !== 'demo-learner') {
+    // Ensure it belongs to the active user
+    if (attempt.userId !== DEMO_USER_ID) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 
